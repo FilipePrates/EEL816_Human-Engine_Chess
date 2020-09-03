@@ -21,43 +21,64 @@
 # engine.go(movetime=2000)
 # print(board)
 
-import chess
-import chess.engine
-
-engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
-
-board = chess.Board()
-
-
-while not board.is_game_over():
-    analysis = engine.analysis(board,chess.engine.Limit(time=0.1),info='INFO_ALL')
-    result = engine.play(board, chess.engine.Limit(time=0.1))
-    print('ãnalysis',analysis.info)
-    print(result)
-    board.push(result.move)
-    print(board)
-    print("--------------------")
-
-engine.quit()
+# import chess
+# import chess.engine
+#
+# engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
+#
+# board = chess.Board()
+#
+#
+# while not board.is_game_over():
+#     analysis = engine.analysis(board,chess.engine.Limit(time=0.1),info='INFO_ALL')
+#     result = engine.play(board, chess.engine.Limit(time=0.1))
+#     print('ãnalysis',analysis.info)
+#     print(result)
+#     board.push(result.move)
+#     print(board)
+#     print("--------------------")
+#
+# engine.quit()
 
 import asyncio
 import chess
 import chess.engine
+import copy
 
-async def main() -> None:
-    board = chess.Board()
-    transport, engine = await chess.engine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
-    print(board)
-    with await engine.analysis(board) as analysis:
-        async for info in analysis:            # Arbitrary stop condition.
-            if info.get("seldepth", 0) == 10:
-                print(info.get("pv"))
-                for move in info.get("pv"):
-                     board.push(move)
-                     print(move)
-                break
 
-    await engine.quit()
 
-asyncio.set_event_loop_policy(chess.engine.EventLoopPolicy())
-asyncio.run(main())
+engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
+# engine2 =  chess.engine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
+
+# engine = chess.uci.popen_engine("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
+board = chess.Board("1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1")
+print(board.legal_moves)
+for move in board.legal_moves:
+    # if(move.uci()[0] == 'R'):
+    print('Move: ',move.from_square)
+    print('Piece: ',board.piece_at(move.from_square))
+    boardAux = copy.deepcopy(board)
+    boardAux.push(move)
+    print(boardAux)
+    analysis = engine.analysis(boardAux,chess.engine.Limit(time=0.1))
+    analysis.get()
+    print('analysis:',analysis.info['score'])
+    print("------------------")
+engine.quit()
+# async def main() -> None:
+#     board = chess.Board()
+#     transport, engine = await chess.engine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
+#     print(board)
+#     with await engine.analysis(board) as analysis:
+#         async for info in analysis:            # Arbitrary stop condition.
+#             if info.get("seldepth", 0) == 10:
+#                 print(info.get("pv"))
+#                 for move in info.get("pv"):
+#                      board.push(move)
+#                      print(move)
+#                 break
+#
+#     await engine.quit()
+#
+# asyncio.set_event_loop_policy(chess.engine.EventLoopPolicy())
+# asyncio.run(main())
