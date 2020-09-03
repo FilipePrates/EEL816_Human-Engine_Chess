@@ -11,7 +11,7 @@ print("Board Inicial")
 print(board)
 print(board.legal_moves)
 
-receivedPiece = input('Escolha a peça (ex. p, N, k, Q, R, r,..)')
+receivedPiece = input('Escolha a peça (ex. P, N, k, Q, R, r,..)')
 bestMove = {"cp":chess.engine.Cp(0),"move":""}
 
 for move in board.legal_moves:
@@ -23,7 +23,6 @@ for move in board.legal_moves:
         print(boardAux)
         analysis = engine.analysis(boardAux,chess.engine.Limit(time=0.3,depth=10))
         analysis.get()
-        # Esse scoring ta estranho...
         print('haha',analysis.info['score'].white())
         if(bestMove['cp'].score() > analysis.info['score'].pov(analysis.info['score'].white()).score()):
             bestMove['cp'] = analysis.info['score'].pov(False)
