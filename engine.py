@@ -32,15 +32,15 @@ engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows
 board = chess.Board(receivedBoard2)
 
 
-print("Board Inicial")
+print("Initial Board")
 print("===============")
 print(board)
 while(not board.is_game_over()):
     print("===============")
     if(board.turn):
-        receivedPiece = input('Escolha a peça (ex. P, N, k, Q, r, B):\n')
+        receivedPiece = input('Choose a piece (ex. P, N, k, Q, r, B):\n')
     else:
-        receivedPiece = input('Escolha a peça (ex. P, N, k, Q, r, B.):\n')
+        receivedPiece = input('Choose a piece (ex. P, N, k, Q, r, B.):\n')
     bestMove = {"cp":chess.engine.Cp(-10000),"move":chess.Move.null()}
     chooseMove(board,receivedPiece[0],board.turn)
 
