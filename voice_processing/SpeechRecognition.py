@@ -1,4 +1,3 @@
-from dtw import *
 from fastdtw import fastdtw
 import numpy as np
 import librosa

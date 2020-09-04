@@ -2,4 +2,10 @@
 
 pip install stockfish
 
-pip install chess
+pip install python-chess
+
+pip install librosa
+
+pip install fastdtw
+
+pip install pyaudio
