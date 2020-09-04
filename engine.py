@@ -21,7 +21,7 @@ def chooseMove(board, piece,turn):
                 bestMove['move'] = move
             board.pop()
 
-    print('BestMove:',bestMove['move'].uci())
+    print('BestMove:',bestMove['move'].uci(),'Score',bestMove['cp'])
     board.push(bestMove['move'])
     print("===============")
     print(board)
@@ -42,7 +42,7 @@ while(not board.is_game_over()):
     else:
         receivedPiece = input('Escolha a peça (ex. P, N, k, Q, r, B.):\n')
     bestMove = {"cp":chess.engine.Cp(-10000),"move":chess.Move.null()}
-    chooseMove(board,receivedPiece,board.turn)
+    chooseMove(board,receivedPiece[0],board.turn)
 
 
 
