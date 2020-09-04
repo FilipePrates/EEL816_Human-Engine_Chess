@@ -43,9 +43,9 @@ def chooseMove(board, piece):
 while(not board.is_game_over()):
     print("===============")
     if(board.turn):
-        receivedPiece = input('Escolha a peça (ex. P, N, K, Q, R, R,..)')
+        receivedPiece = input('Escolha a peça (ex. P, N, k, Q, r, B)')
     else:
-        receivedPiece = input('Escolha a peça (ex. p, n, k, q, r, r,..)')
+        receivedPiece = input('Escolha a peça (ex. P, N, k, Q, r, B.)')
     bestMove = {"cp":chess.engine.Cp(-10000),"move":chess.Move.null()}
     chooseMove(board,receivedPiece)
 
