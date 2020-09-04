@@ -2,8 +2,13 @@ import chess
 import chess.engine
 import copy
 
+receivedPiece = 'P'
+receivedBoard = '1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1'
+receivedBoard2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
-def chooseMove(board, piece):
+
+
+def chooseMove(board, piece,turn):
     for move in board.legal_moves:
         if(board.piece_at(move.from_square).symbol().lower() == piece.lower()):
             board.push(move)
@@ -11,8 +16,8 @@ def chooseMove(board, piece):
             analysis = engine.analysis(board,chess.engine.Limit(time=0.3,depth=15))
             analysis.get()
 
-            if(bestMove['cp'].score() < analysis.info['score'].pov(analysis.info['score'].turn).score()):
-                bestMove['cp'] = analysis.info['score'].pov(analysis.info['score'].turn)
+            if(bestMove['cp'].score() < analysis.info['score'].pov(turn).score()):
+                bestMove['cp'] = analysis.info['score'].pov(turn)
                 bestMove['move'] = move
             board.pop()
 
@@ -21,16 +26,10 @@ def chooseMove(board, piece):
     print("===============")
     print(board)
 
-receivedPiece = 'P'
-receivedBoard = '1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1'
-receivedBoard2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 
 engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
 board = chess.Board(receivedBoard2)
-
-
-
 
 
 print("Board Inicial")
@@ -43,7 +42,7 @@ while(not board.is_game_over()):
     else:
         receivedPiece = input('Escolha a peça (ex. P, N, k, Q, r, B.):\n')
     bestMove = {"cp":chess.engine.Cp(-10000),"move":chess.Move.null()}
-    chooseMove(board,receivedPiece)
+    chooseMove(board,receivedPiece,board.turn)
 
 
 
