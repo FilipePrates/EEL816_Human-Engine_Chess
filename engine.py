@@ -1,6 +1,7 @@
 import chess
 import chess.engine
 import copy
+from voice_processing.DtwSpeechReconizer import DtwSpeechReconizer
 
 receivedPiece = 'P'
 receivedBoard = '1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1'
@@ -8,7 +9,7 @@ receivedBoard2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 
 
-def chooseMove(board, piece,turn):
+def chooseMove(board, piece, turn):
     for move in board.legal_moves:
         if(board.piece_at(move.from_square).symbol().lower() == piece.lower()):
             board.push(move)
@@ -30,7 +31,7 @@ def chooseMove(board, piece,turn):
 
 engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
 board = chess.Board(receivedBoard2)
-
+recognizer = DtwSpeechReconizer("actions.txt")
 
 print("Initial Board")
 print("===============")
