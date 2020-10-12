@@ -5,7 +5,7 @@ from copy import deepcopy
 import glob, os        
 
 class SpeechReconizer:
-    def __init__(self, labelsPath):
+    def __init__(self, labelsPath, tolerance, maxTolerance):
         # Inicializa o objeto de reconhecimento.
         # Usa o caminho 'labelsPath' para obter uma lista
         # dos rótulos passiveis de reconhecimento.
@@ -13,6 +13,8 @@ class SpeechReconizer:
             labels = np.array([l.replace('\n', '') for l in f.readlines()])
         self.labels = labels
         self.callbacks = {}
+        self.tolerance = tolerance
+        self.maxTolerance = maxTolerance
        
        
     def recognize(self, audioStream, executeCallback = False):
@@ -33,10 +35,15 @@ class SpeechReconizer:
         # É usada caso o audio não tenha sido reconhecido.
         self.defaultCallback = callback
 
+    def attachFailedCallback(self, callback):
+        # Vincula uma chamada de callback padrão.
+        # É usada caso o audio não tenha sido reconhecido.
+        self.failedCallback = callback
+
 
 class DtwSpeechReconizer(SpeechReconizer):
-    def __init__(self, labelsPath, distFunction = np.linalg.norm):
-        super().__init__(labelsPath)
+    def __init__(self, labelsPath, tolerance, maxTolerance, distFunction = lambda x, y: np.linalg.norm(x - y, ord = 1)):
+        super().__init__(labelsPath, tolerance, maxTolerance)
         self.distFunction = distFunction
         self.precomputeMFCCs()
         pass
@@ -63,7 +70,14 @@ class DtwSpeechReconizer(SpeechReconizer):
             if dist < currentMinDist:
                 currentMinDist = dist
                 currentMinId = i
-        
+            if dist < self.tolerance:
+                break
+        pass
+
+        if dist > self.maxTolerance:
+            self.failedCallback()
+            return (False, None, None, None)
+
         label = self.labels[currentMinId]        
         if executeCallback:
             if label in self.callbacks:
@@ -71,7 +85,7 @@ class DtwSpeechReconizer(SpeechReconizer):
             else:
                 self.defaultCallback(label, currentMinDist, self.samples[currentMinId])
 
-        return label, currentMinDist, self.samples[currentMinId]
+        return (True, label, currentMinDist, self.samples[currentMinId])
 
     def precomputeMFCCs(self):
         """
@@ -106,5 +120,6 @@ class DtwSpeechReconizer(SpeechReconizer):
         for j in range(mfcc.shape[1]):
             mfcc_cp[:, j] = mfcc[:, j] - np.mean(mfcc[:, j])
             mfcc_cp[:, j] = mfcc_cp[:, j]/np.max(np.abs(mfcc_cp[:, j]))
-        
+        pass
+
         return mfcc_cp.T
