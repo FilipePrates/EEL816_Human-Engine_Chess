@@ -53,7 +53,7 @@ def recognized(label, currentMinDist, sample):
     pass
 
 def listenToMic():
-    while True:
+    while not board.is_game_over():
         if not keyboard.is_pressed('q'):
             time.sleep(0.001)
             continue
@@ -72,7 +72,10 @@ print("Initial Board")
 printBoard(board)
 
 
-while(not board.is_game_over()):
+while (not board.is_game_over()):
+    if keyboard.is_pressed('esc'):
+        break
     pass
 
 engine.quit()
+print("Jogo finalizado")
