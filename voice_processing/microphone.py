@@ -5,10 +5,10 @@ import copy
 import pyaudio
 import wave
 
-THRESHOLD = 6000
+THRESHOLD = 5000
 CHUNK_SIZE = 1024
 RATE = 16000
-SILENT_CHUNKS = 5 * RATE / CHUNK_SIZE
+SILENT_CHUNKS = 3 * RATE / CHUNK_SIZE
 FORMAT = pyaudio.paInt16
 FRAME_MAX_VALUE = 2 ** 15 - 1
 NORMALIZE_MINUS_ONE_dB = 10 ** (-1.0 / 20)
@@ -42,11 +42,15 @@ def trim(data_all):
 
     return copy.deepcopy(data_all[int(_from):int(_to + 1)])
 
-def record():
-    p = pyaudio.PyAudio()
-    stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE,
-                    input=True, output=True, frames_per_buffer=CHUNK_SIZE)
+def add_silence(snd_data, seconds):
+    "Add silence to the start and end of 'snd_data' of length 'seconds' (float)"
+    silence = [0] * int(seconds * RATE)
+    r = array('h', silence)
+    r.extend(snd_data)
+    r.extend(silence)
+    return r
 
+def record():
     silent_chunks = 0
     audio_started = False
     data_all = array('h')
@@ -69,12 +73,13 @@ def record():
             audio_started = True              
 
     sample_width = p.get_sample_size(FORMAT)
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    #stream.stop_stream()
+    #stream.close()
+    #p.terminate()
 
     data_all = trim(data_all)
     data_all = normalize(data_all)
+    data_all = add_silence(data_all, 0.5)
     return sample_width, data_all
 
 def recordToFile(path):
@@ -88,3 +93,8 @@ def recordToFile(path):
     wave_file.writeframes(data)
 
     wave_file.close()
+
+
+p = pyaudio.PyAudio()
+stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE,
+                input=True, output=True, frames_per_buffer=CHUNK_SIZE)
