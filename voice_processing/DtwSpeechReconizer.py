@@ -63,7 +63,7 @@ class DtwSpeechReconizer(SpeechReconizer):
         """
         x = self.__computeMFCC(librosa.load(audioStream))
         currentMinDist, currentMinId = np.inf, -1
-
+        dist = float('inf')
         for i, y in self.mfccs.items():
             dist, _ = self._DtwSpeechReconizer__run(x, y)
 
