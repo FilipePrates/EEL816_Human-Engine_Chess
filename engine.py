@@ -6,7 +6,7 @@ import keyboard
 import time
 import voice_processing.microphone as mic
 import sys
-from voice_processing.DtwSpeechReconizer import DtwSpeechReconizer
+from voice_processing import *
 from threading import Thread
 
 receivedBoard = '1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1'
@@ -14,7 +14,9 @@ receivedBoard2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
 board = chess.Board(receivedBoard2)
-recognizer = DtwSpeechReconizer("actions.txt", 25, 50)
+#recognizer = DtaiDtwSpeechReconizer("actions.txt", 25, 50)
+#recognizer = PyDtwSpeechReconizer("actions.txt", 25, 50)
+recognizer = CyDtwSpeechReconizer("actions.txt", 1.5, 5)
 
 def printBoard(board):
     print("===============")
@@ -59,7 +61,7 @@ def listenToMic():
             continue
         print("ouvindo")
         mic.recordToFile("output.wav")
-        recognizer.recognize("output.wav", True)
+        recognizer.recognizeFile("output.wav", True)
         os.remove("output.wav")
 
 recognizer.attachDefaultCallback(recognized)

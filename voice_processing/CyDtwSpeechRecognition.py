@@ -1,50 +1,13 @@
-from fastdtw import fastdtw
 import numpy as np
 import librosa
 from copy import deepcopy
 import glob, os        
+from .SpeechRecognition import SpeechReconizer
+from cydtw import dtw
 
-class SpeechReconizer:
+class CyDtwSpeechReconizer(SpeechReconizer):
     def __init__(self, labelsPath, tolerance, maxTolerance):
-        # Inicializa o objeto de reconhecimento.
-        # Usa o caminho 'labelsPath' para obter uma lista
-        # dos rótulos passiveis de reconhecimento.
-        with open(labelsPath) as f:
-            labels = np.array([l.replace('\n', '') for l in f.readlines()])
-        self.labels = labels
-        self.callbacks = {}
-        self.tolerance = tolerance
-        self.maxTolerance = maxTolerance
-       
-       
-    def recognize(self, audioStream, executeCallback = False):
-        # Executa a rotina de reconhecimento e retorna o rótulo associado.
-        # Se 'executeCallback' for igual True, o callback associado a esse rótulo será chamado.
-        pass
-
-    def attachCallback(self, label, callback):
-        # Vincula uma chamada de callback ao rótulo passado em 'label'.
-        if label in self.callbacks:
-            print("Esse label já tem um callback definido")
-            return
-
-        self.callbacks[label] = callback
-
-    def attachDefaultCallback(self, callback):
-        # Vincula uma chamada de callback padrão.
-        # É usada caso o audio não tenha sido reconhecido.
-        self.defaultCallback = callback
-
-    def attachFailedCallback(self, callback):
-        # Vincula uma chamada de callback padrão.
-        # É usada caso o audio não tenha sido reconhecido.
-        self.failedCallback = callback
-
-
-class DtwSpeechReconizer(SpeechReconizer):
-    def __init__(self, labelsPath, tolerance, maxTolerance, distFunction = lambda x, y: np.linalg.norm(x - y, ord = 1)):
         super().__init__(labelsPath, tolerance, maxTolerance)
-        self.distFunction = distFunction
         self.precomputeMFCCs()
         pass
         
@@ -55,17 +18,17 @@ class DtwSpeechReconizer(SpeechReconizer):
         Esse método pode ser sobrescrito para utilizar implementações diferentes do DTW.
         Como o AcceleratedDTW.
         """
-        return fastdtw(x, y, dist = self.distFunction)
-                
-    def recognize(self, audioStream, executeCallback = False):
+        return dtw(x, y)
+
+    def __recognize(self, audioStream, executeCallback = False):
         """
         Faz reconhecimento da stream de audio usando alguma implementação do algoritmo FastDTW
         """
-        x = self.__computeMFCC(librosa.load(audioStream))
+        x = self.__computeMFCC(audioStream)
         currentMinDist, currentMinId = np.inf, -1
         dist = float('inf')
         for i, y in self.mfccs.items():
-            dist, _ = self._DtwSpeechReconizer__run(x, y)
+            dist = self._DtwSpeechReconizer__run(x, y)
 
             if dist < currentMinDist:
                 currentMinDist = dist
@@ -86,6 +49,18 @@ class DtwSpeechReconizer(SpeechReconizer):
                 self.defaultCallback(label, currentMinDist, self.samples[currentMinId])
 
         return (True, label, currentMinDist, self.samples[currentMinId])
+            
+    def recognizeFile(self, audioPath, executeCallback = False):
+        """
+        Faz reconhecimento do arquivo de audio usando alguma implementação do algoritmo FastDTW
+        """
+        return self.__recognize(librosa.load(audioPath), executeCallback)
+    
+    def recognize(self, audioStream, executeCallback = False):
+        """
+        Faz reconhecimento do arquivo de audio usando alguma implementação do algoritmo FastDTW
+        """
+        return self.__recognize(audioStream, executeCallback)
 
     def precomputeMFCCs(self):
         """
@@ -111,6 +86,8 @@ class DtwSpeechReconizer(SpeechReconizer):
         Computa MFCC e normaliza valores do audio passado.
         """
         y, sr = audio
+        #return y #np.array(y, dtype = np.float64)
+
         mfcc = librosa.feature.mfcc(y, sr)
 
         if not normalize:
@@ -122,4 +99,4 @@ class DtwSpeechReconizer(SpeechReconizer):
             mfcc_cp[:, j] = mfcc_cp[:, j]/np.max(np.abs(mfcc_cp[:, j]))
         pass
 
-        return mfcc_cp.T
+        return mfcc_cp.T.astype(np.float)

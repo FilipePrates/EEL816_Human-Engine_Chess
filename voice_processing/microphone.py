@@ -84,16 +84,16 @@ def record():
 
 def recordToFile(path):
     sample_width, data = record()
-    data = pack('<' + ('h' * len(data)), *data)
-
     wave_file = wave.open(path, 'wb')
     wave_file.setnchannels(CHANNELS)
     wave_file.setsampwidth(sample_width)
     wave_file.setframerate(RATE)
     wave_file.writeframes(data)
-
     wave_file.close()
-
+    
+def sample():
+    _, data = record()
+    return data
 
 p = pyaudio.PyAudio()
 stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE,
