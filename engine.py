@@ -7,7 +7,6 @@ import time
 import voice_processing.microphone as mic
 import sys
 from voice_processing import *
-from threading import Thread
 
 receivedBoard = '1k1r4/pp1b1R2/3q2pp/4p3/2B5/4Q3/PPP2B2/2K5 b - - 0 1'
 receivedBoard2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -53,31 +52,26 @@ def recognized(label, currentMinDist, sample):
     print(sample)
     chooseMove(board, label, board.turn)
     pass
-
-def listenToMic():
-    while not board.is_game_over():
-        if not keyboard.is_pressed('q'):
-            time.sleep(0.001)
-            continue
-        print("ouvindo")
-        mic.recordToFile("output.wav")
-        recognizer.recognizeFile("output.wav", True)
-        os.remove("output.wav")
-
+   
 recognizer.attachDefaultCallback(recognized)
 recognizer.attachFailedCallback(notRecognized)
-
-voiceRecognitionThread = Thread(target = listenToMic)
-voiceRecognitionThread.start()
 
 print("Initial Board")
 printBoard(board)
 
-
 while (not board.is_game_over()):
     if keyboard.is_pressed('esc'):
         break
+
+    if not keyboard.is_pressed('q'):
+        time.sleep(0.001)
+        continue
     pass
+
+    print("ouvindo")
+    mic.recordToFile("output.wav")
+    recognizer.recognizeFile("output.wav", True)
+    os.remove("output.wav")
 
 engine.quit()
 print("Jogo finalizado")
