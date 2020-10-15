@@ -27,14 +27,17 @@ class PyDtwSpeechReconizer(SpeechReconizer):
         x = self.__computeMFCC(audioStream)
         currentMinDist, currentMinId = np.inf, -1
         dist = float('inf')
-        for i, y in self.mfccs.items():
-            dist = self._DtwSpeechReconizer__run(x, y)
+        for i in range(len(self.labels)):
+            label = self.labels[i]
+            for  y in self.mfccs[i]:
+                dist = self._DtwSpeechReconizer__run(x, y)
 
-            if dist < currentMinDist:
-                currentMinDist = dist
-                currentMinId = i
-            if dist < self.tolerance:
-                break
+                if dist < currentMinDist:
+                    currentMinDist = dist
+                    currentMinId = i
+                if dist < self.tolerance:
+                    break
+            pass
         pass
 
         if dist > self.maxTolerance:
@@ -44,11 +47,11 @@ class PyDtwSpeechReconizer(SpeechReconizer):
         label = self.labels[currentMinId]        
         if executeCallback:
             if label in self.callbacks:
-                self.callbacks[label](label, currentMinDist, self.samples[currentMinId])
+                self.callbacks[label](label, currentMinDist)
             else:
-                self.defaultCallback(label, currentMinDist, self.samples[currentMinId])
+                self.defaultCallback(label, currentMinDist)
 
-        return (True, label, currentMinDist, self.samples[currentMinId])
+        return (True, label, currentMinDist)
             
     def recognizeFile(self, audioPath, executeCallback = False):
         """
@@ -61,17 +64,16 @@ class PyDtwSpeechReconizer(SpeechReconizer):
         Pre computa MFCCs dos audios salvos para agilizar o reconhecimento.
         """
         self.mfccs = {}
-        self.samples = {}
         for i in range(len(self.labels)):
             label = self.labels[i]
+            self.mfccs[i] = []
             directory = 'sounds/{}/'.format(label)
             for filename in os.listdir(directory):
                 if not filename.endswith(".wav"):
                     continue
 
                 audio = librosa.load('{}/{}'.format(directory, filename))
-                self.samples[i] = audio
-                self.mfccs[i] = self.__computeMFCC(audio)
+                self.mfccs[i].append(self.__computeMFCC(audio))
             pass
         pass
         

@@ -14,7 +14,8 @@ receivedBoard2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 engine = chess.engine.SimpleEngine.popen_uci("stockfish\stockfish-11-win\Windows\stockfish_20011801_x64")
 board = chess.Board(receivedBoard2)
 #recognizer = DtaiDtwSpeechReconizer("actions.txt", 25, 50)
-#recognizer = PyDtwSpeechReconizer("actions.txt", 25, 50)
+#recognizer = FastDtwSpeechReconizer("actions.txt", 25, 50)
+#recognizer = PyDtwSpeechReconizer("actions.txt", 25, 50) # Ainda não funciona
 recognizer = CyDtwSpeechReconizer("actions.txt", 1.5, 5)
 
 def printBoard(board):
@@ -46,10 +47,9 @@ def notRecognized():
     print("Não reconhecido")
     pass
 
-def recognized(label, currentMinDist, sample):
+def recognized(label, currentMinDist):
     print(label)
     print(currentMinDist)
-    print(sample)
     chooseMove(board, label, board.turn)
     pass
    
@@ -64,7 +64,6 @@ while (not board.is_game_over()):
         break
 
     if not keyboard.is_pressed('q'):
-        time.sleep(0.001)
         continue
     pass
 
